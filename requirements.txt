@@ -3,7 +3,8 @@ beautifulsoup4==4.12.3
 google-genai==0.2.2
 schedule==1.2.1
 python-dotenv==1.0.1
-duckduckgo-search>=6.0.0
+ddgs
+
 
 Flask==3.0.2
 gunicorn==21.2.0

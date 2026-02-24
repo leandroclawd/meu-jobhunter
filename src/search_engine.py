@@ -2,7 +2,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 
 def duckduckgo_search_jobs(query, num_results=5):
     """Realiza a busca usando DuckDuckGo Search (sem necessidade de chaves)."""
@@ -45,9 +45,9 @@ def get_job_opportunities():
     """Busca vagas usando os dorks configurados."""
     
     queries = [
-        'site:gupy.io/job ("gerente de rh" OR "recursos humanos" OR "business partner" OR "analista sênior") ("manaus" OR "remoto")',
-        'site:boards.greenhouse.io ("recursos humanos" OR "analista sênior") ("manaus" OR "remoto")',
-        'site:jobs.lever.co ("recursos humanos" OR "analista sênior") ("manaus" OR "remoto")'
+        'site:gupy.io/job ("gerente de rh" OR "recursos humanos" OR "business partner" OR "analista sênior") "manaus"',
+        'site:boards.greenhouse.io ("recursos humanos" OR "analista sênior") "manaus"',
+        'site:jobs.lever.co ("recursos humanos" OR "analista sênior") "manaus"'
     ]
     
     jobs_data = []
