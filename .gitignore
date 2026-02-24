@@ -1,0 +1,10 @@
+.env
+venv/
+__pycache__/
+*.pyc
+result.txt
+vagas_encontradas.md
+test.json
+test.py
+test2.py
+.venv/
