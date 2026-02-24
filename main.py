@@ -69,22 +69,27 @@ def run_scheduler():
         schedule.run_pending()
         time.sleep(60)
 
-def main():
+def init_bot():
     print("Job Hunter Bot inicializado. Validando ambiente...")
     
     if not os.getenv("TELEGRAM_TOKEN"):
-        print("Aviso: TELEGRAM_TOKEN não configurado no .env")
+        print("Aviso: TELEGRAM_TOKEN não configurado!")
     if not os.getenv("TELEGRAM_CHAT_ID"):
-        print("Aviso: TELEGRAM_CHAT_ID não configurado no .env. Não conseguiremos enviar!")
+        print("Aviso: TELEGRAM_CHAT_ID não configurado!")
     if not os.getenv("GEMINI_API_KEY"):
-        print("Erro: GEMINI_API_KEY não encontrada no .env")
+        print("Erro: GEMINI_API_KEY não encontrada!")
         return
 
     # Inicia o scheduler em uma thread separada
+    print("\n[*] Iniciando agendador de tarefas em segundo plano...")
     scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
     scheduler_thread.start()
 
-    # Inicia o servidor Flask (Render usará a variável de ambiente PORT)
+# Inicializa o bot assim que o módulo for carregado (pelo Gunicorn ou localmente)
+init_bot()
+
+def main():
+    # Inicia o servidor Flask localmente (apenas para desenvolvimento)
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
 
