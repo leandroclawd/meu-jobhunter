@@ -2,7 +2,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 
-from ddgs import DDGS
+from duckduckgo_search import DDGS
 
 def duckduckgo_search_jobs(query, num_results=5):
     """Realiza a busca usando DuckDuckGo Search (sem necessidade de chaves)."""
