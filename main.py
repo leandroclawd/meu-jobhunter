@@ -24,6 +24,7 @@ def run_job_search():
     
     if not jobs:
         print("Nenhuma vaga encontrada ou erro na busca.")
+        send_jobs_report([]) # Notifica o Telegram que a busca terminou (mesmo sem resultados)
         return
         
     print(f"\n2. Avaliando {len(jobs)} vagas com o Gemini...")
@@ -53,9 +54,14 @@ def run_job_search():
         send_jobs_report(avaliacoes)
     else:
         print("\nNenhuma das vagas de hoje foi aprovada pelo critério do agente.")
+        send_jobs_report([]) # Também avisa se nenhuma foi aprovada pelo critério
 
 def run_scheduler():
     print("\nConfigurando agendamento. O bot rodará 2 vezes ao dia (08:00 e 18:00).")
+    
+    # Notifica que o bot está ativo
+    from src.telegram_bot import send_telegram_message
+    send_telegram_message("🤖 **Job Hunter Bot** inicializado com sucesso na nuvem!")
     
     # Roda a primeira vez ao iniciar
     run_job_search()
