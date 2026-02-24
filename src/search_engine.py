@@ -45,9 +45,11 @@ def get_job_opportunities():
     """Busca vagas usando os dorks configurados."""
     
     queries = [
-        'site:gupy.io/job ("gerente de rh" OR "recursos humanos" OR "business partner" OR "analista sênior") "manaus"',
-        'site:boards.greenhouse.io ("recursos humanos" OR "analista sênior") "manaus"',
-        'site:jobs.lever.co ("recursos humanos" OR "analista sênior") "manaus"'
+        'site:gupy.io/job "Recursos Humanos" "Manaus" -remoto',
+        'site:gupy.io/job "Gerente de RH" "Manaus" -remoto',
+        'site:gupy.io/job "HRBP" "Manaus" -remoto',
+        'site:boards.greenhouse.io "Recursos Humanos" "Manaus"',
+        'site:jobs.lever.co "Recursos Humanos" "Manaus"'
     ]
     
     jobs_data = []

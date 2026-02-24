@@ -39,7 +39,7 @@ def evaluate_job(job_url, job_text):
     
     try:
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-2.0-flash',
             contents=prompt,
         )
         # Se a IA decidiu descartar essa vaga, não retornamos nada
