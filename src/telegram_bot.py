@@ -26,8 +26,10 @@ def send_telegram_message(message):
         "disable_web_page_preview": True
     }
     
+    print(f"[Telegram] Enviando mensagem para chat_id {chat_id}...")
     try:
         response = requests.post(url, json=payload, timeout=10)
+
         print(f"[Telegram] Status: {response.status_code}, Resposta: {response.text}")
         response.raise_for_status()
         return True
