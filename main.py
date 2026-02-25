@@ -67,21 +67,17 @@ def run_job_search():
         print(f"Erro crítico no run_job_search: {e}")
 
 def run_scheduler():
-    print("\nConfigurando agendamento (Horários de Brasília): 08:00, 18:00 e 22:30 (hoje).")
-    
     # Notifica que o bot está ativo
     from src.telegram_bot import send_telegram_message
-    send_telegram_message("🤖 **Job Hunter Bot** inicializado! Fuso BRT configurado.\nPróximas buscas: 08:00, 18:00 e 22:30.")
+    send_telegram_message("🤖 **Job Hunter Bot** inicializado! Fuso BRT configurado.\nPróximas buscas: 08:00 e 18:00.")
     
     # NÃO roda run_job_search() aqui para evitar erro 503 no startup da Render
     
     # Horários em UTC (BRT = UTC-3)
     # 08:00 BRT -> 11:00 UTC
     # 18:00 BRT -> 21:00 UTC
-    # 22:30 BRT -> 01:30 UTC (amanhã)
     schedule.every().day.at("11:00").do(run_job_search)
     schedule.every().day.at("21:00").do(run_job_search)
-    schedule.every().day.at("01:30").do(run_job_search)
     
     print("\n[*] Scheduler em modo de espera (UTC base).")
     while True:
