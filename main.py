@@ -14,66 +14,79 @@ app = Flask(__name__)
 
 @app.route('/')
 def health_check():
-    return "Job Hunter Bot is running!", 200
+    return "Job Hunter Bot is running! (BRT Timezone Configured)", 200
+
+@app.route('/run')
+def manual_run():
+    print(f"\n[*] Disparo manual via URL as {time.strftime('%H:%M:%S')}")
+    # Dispara em uma thread para não travar o cron-job.org (evita timeout)
+    search_thread = threading.Thread(target=run_job_search)
+    search_thread.start()
+    return "Busca de vagas iniciada com sucesso! Verifique o Telegram em breve.", 200
 
 def run_job_search():
-    print(f"\n--- Iniciando Job Hunter Bot às {time.strftime('%H:%M')} ---")
-    
-    print("\n1. Buscando novas oportunidades nos sites...")
-    jobs = get_job_opportunities()
-    
-    if not jobs:
-        print("Nenhuma vaga encontrada ou erro na busca.")
-        send_jobs_report([]) # Notifica o Telegram que a busca terminou (mesmo sem resultados)
-        return
+    try:
+        print(f"\n--- Iniciando Job Hunter Bot às {time.strftime('%H:%M')} ---")
         
-    print(f"\n2. Avaliando {len(jobs)} vagas com o Gemini...")
-    avaliacoes = []
-    
-    for i, job in enumerate(jobs):
-        print(f"  Avaliando vaga {i+1}/{len(jobs)}: {job['url']}")
-        resultado = evaluate_job(job['url'], job['text'])
+        print("\n1. Buscando novas oportunidades nos sites...")
+        jobs = get_job_opportunities()
         
-        if resultado:
-            avaliacoes.append(resultado)
+        if not jobs:
+            print("Nenhuma vaga encontrada ou erro na busca.")
+            send_jobs_report([])
+            return
             
-        time.sleep(2)  # Pausa pequena para evitar sobrecarregar a API do Gemini
+        print(f"\n2. Avaliando {len(jobs)} vagas com o Gemini...")
+        avaliacoes = []
         
-    if avaliacoes:
-        print(f"\n3. Salvando e enviando {len(avaliacoes)} resultados aprovados...")
-        try:
-            with open("vagas_encontradas.md", "a", encoding="utf-8") as f:
-                f.write(f"\n\n## Buscas de {time.strftime('%d/%m/%Y %H:%M')}\n\n")
-                for av in avaliacoes:
-                    f.write(av + "\n\n")
-            print("Salvo no relatório MD com sucesso.")
-        except Exception as e:
-            print(f"Erro ao salvar arquivo MD: {e}")
+        for i, job in enumerate(jobs):
+            print(f"  Avaliando vaga {i+1}/{len(jobs)}: {job['url']}")
+            resultado = evaluate_job(job['url'], job['text'])
             
-        # Envia pelo telegram
-        send_jobs_report(avaliacoes)
-    else:
-        print("\nNenhuma das vagas de hoje foi aprovada pelo critério do agente.")
-        send_jobs_report([]) # Também avisa se nenhuma foi aprovada pelo critério
+            if resultado:
+                avaliacoes.append(resultado)
+                
+            time.sleep(2)
+            
+        if avaliacoes:
+            print(f"\n3. Salvando e enviando {len(avaliacoes)} resultados aprovados...")
+            try:
+                with open("vagas_encontradas.md", "a", encoding="utf-8") as f:
+                    f.write(f"\n\n## Buscas de {time.strftime('%d/%m/%Y %H:%M')}\n\n")
+                    for av in avaliacoes:
+                        f.write(av + "\n\n")
+                print("Salvo no relatório MD com sucesso.")
+            except Exception as e:
+                print(f"Erro ao salvar arquivo MD: {e}")
+                
+            send_jobs_report(avaliacoes)
+        else:
+            print("\nNenhuma das vagas de hoje foi aprovada pelo critério do agente.")
+            send_jobs_report([])
+    except Exception as e:
+        print(f"Erro crítico no run_job_search: {e}")
 
 def run_scheduler():
-    print("\nConfigurando agendamento. O bot rodará 2 vezes ao dia (08:00 e 18:00).")
+    print("\nConfigurando agendamento (Horários de Brasília): 08:00, 18:00 e 22:00 (hoje).")
     
     # Notifica que o bot está ativo
     from src.telegram_bot import send_telegram_message
-    send_telegram_message("🤖 **Job Hunter Bot** inicializado com sucesso na nuvem!")
+    send_telegram_message("🤖 **Job Hunter Bot** inicializado! Fuso BRT configurado.\nPróximas buscas: 08:00, 18:00 e 22:00.")
     
-    # Roda a primeira vez ao iniciar
-    run_job_search()
+    # NÃO roda run_job_search() aqui para evitar erro 503 no startup da Render
     
-    # Agenda para depois
-    schedule.every().day.at("08:00").do(run_job_search)
-    schedule.every().day.at("18:00").do(run_job_search)
+    # Horários em UTC (BRT = UTC-3)
+    # 08:00 BRT -> 11:00 UTC
+    # 18:00 BRT -> 21:00 UTC
+    # 22:00 BRT -> 01:00 UTC (amanhã)
+    schedule.every().day.at("11:00").do(run_job_search)
+    schedule.every().day.at("21:00").do(run_job_search)
+    schedule.every().day.at("01:00").do(run_job_search)
     
-    print("\n[*] Scheduler em modo de espera.")
+    print("\n[*] Scheduler em modo de espera (UTC base).")
     while True:
         schedule.run_pending()
-        time.sleep(60)
+        time.sleep(30)
 
 def init_bot():
     print("Job Hunter Bot inicializado. Validando ambiente...")
@@ -91,13 +104,13 @@ def init_bot():
     scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
     scheduler_thread.start()
 
-# Inicializa o bot assim que o módulo for carregado (pelo Gunicorn ou localmente)
+# Inicializa o bot assim que o módulo for carregado
 init_bot()
 
 def main():
-    # Inicia o servidor Flask localmente (apenas para desenvolvimento)
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
 
 if __name__ == "__main__":
     main()
+
