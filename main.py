@@ -1,34 +1,41 @@
 import os
 import time
-import schedule
 import threading
 from flask import Flask
 from dotenv import load_dotenv
+import pytz
+from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
 from src.search_engine import get_job_opportunities
 from src.ai_agent import evaluate_job
-from src.telegram_bot import send_jobs_report
+from src.telegram_bot import send_jobs_report, send_telegram_message
 
 load_dotenv()
 
 app = Flask(__name__)
 
+# Configuração do Fuso Horário de Manaus (UTC-4)
+MANAUS_TZ = pytz.timezone('America/Manaus')
+
 @app.route('/')
 def health_check():
-    return "Job Hunter Bot is running! (BRT Timezone Configured)", 200
+    # Endpoint extremamente leve para o UptimeRobot e Render
+    return "OK", 200
 
 @app.route('/run')
 def manual_run():
-    print(f"\n[*] Disparo manual via URL as {time.strftime('%H:%M:%S')}")
-    # Dispara em uma thread para não travar o cron-job.org (evita timeout)
+    now_str = datetime.now(MANAUS_TZ).strftime('%H:%M:%S')
+    print(f"\n[*] Disparo manual via URL às {now_str}")
     search_thread = threading.Thread(target=run_job_search)
     search_thread.start()
-    return "Busca de vagas iniciada com sucesso! Verifique o Telegram em breve.", 200
+    return "Busca de vagas iniciada com sucesso!", 200
 
 def run_job_search():
     try:
-        print(f"\n--- Iniciando Job Hunter Bot às {time.strftime('%H:%M')} ---")
+        now = datetime.now(MANAUS_TZ)
+        print(f"\n--- Iniciando Job Hunter Bot às {now.strftime('%d/%m/%Y %H:%M')} (Manaus) ---")
         
-        print("\n1. Buscando novas oportunidades nos sites...")
+        print("\n1. Buscando novas oportunidades...")
         jobs = get_job_opportunities()
         
         if not jobs:
@@ -42,71 +49,71 @@ def run_job_search():
         for i, job in enumerate(jobs):
             print(f"  Avaliando vaga {i+1}/{len(jobs)}: {job['url']}")
             resultado = evaluate_job(job['url'], job['text'])
-            
             if resultado:
                 avaliacoes.append(resultado)
-                
             time.sleep(2)
             
         if avaliacoes:
-            print(f"\n3. Salvando e enviando {len(avaliacoes)} resultados aprovados...")
+            print(f"\n3. Enviando {len(avaliacoes)} resultados aprovados...")
             try:
                 with open("vagas_encontradas.md", "a", encoding="utf-8") as f:
-                    f.write(f"\n\n## Buscas de {time.strftime('%d/%m/%Y %H:%M')}\n\n")
+                    f.write(f"\n\n## Buscas de {now.strftime('%d/%m/%Y %H:%M')}\n\n")
                     for av in avaliacoes:
                         f.write(av + "\n\n")
-                print("Salvo no relatório MD com sucesso.")
             except Exception as e:
                 print(f"Erro ao salvar arquivo MD: {e}")
-                
             send_jobs_report(avaliacoes)
         else:
-            print("\nNenhuma das vagas de hoje foi aprovada pelo critério do agente.")
+            print("\nNenhuma das vagas foi aprovada.")
             send_jobs_report([])
+            
     except Exception as e:
         print(f"Erro crítico no run_job_search: {e}")
 
-def run_scheduler():
-    # Notifica que o bot está ativo
-    from src.telegram_bot import send_telegram_message
-    send_telegram_message("🤖 **Job Hunter Bot** inicializado! Fuso BRT configurado.\nPróximas buscas: 08:00 e 18:00.")
+def start_scheduler():
+    # Inicializa o scheduler com o fuso horário correto
+    scheduler = BackgroundScheduler(timezone=MANAUS_TZ)
     
-    # NÃO roda run_job_search() aqui para evitar erro 503 no startup da Render
+    # Agendamentos originais (Manaus Time)
+    scheduler.add_job(run_job_search, 'cron', hour=8, minute=0, id='search_morning')
+    scheduler.add_job(run_job_search, 'cron', hour=18, minute=0, id='search_evening')
     
-    # Horários em UTC (BRT = UTC-3)
-    # 08:00 BRT -> 11:00 UTC
-    # 18:00 BRT -> 21:00 UTC
-    schedule.every().day.at("11:00").do(run_job_search)
-    schedule.every().day.at("21:00").do(run_job_search)
+    # TESTE PARA O USUÁRIO: 20:00 de hoje (Manaus)
+    scheduler.add_job(run_job_search, 'cron', hour=20, minute=0, id='search_test_20h')
     
-    print("\n[*] Scheduler em modo de espera (UTC base).")
-    while True:
-        schedule.run_pending()
-        time.sleep(30)
+    scheduler.start()
+    
+    # Log dos próximos passos
+    print("\n[*] Scheduler iniciado (Fuso: America/Manaus)")
+    for job in scheduler.get_jobs():
+        print(f"    - Tarefa '{job.id}': Próxima execução em {job.next_run_time}")
+
+    # Notificação tardia (após o boot do servidor principal)
+    def notify_start():
+        time.sleep(10) # Aguarda o servidor estabilizar
+        send_telegram_message("🤖 **Job Hunter Bot** inicializado!\nFuso: Manaus (UTC-4)\nBuscas: 08:00, 18:00 e Teste 20:00.")
+    
+    threading.Thread(target=notify_start, daemon=True).start()
 
 def init_bot():
-    print("Job Hunter Bot inicializado. Validando ambiente...")
+    print("Validando variáveis de ambiente...")
+    required = ["TELEGRAM_TOKEN", "TELEGRAM_CHAT_ID", "GEMINI_API_KEY"]
+    missing = [env for env in required if not os.getenv(env)]
     
-    if not os.getenv("TELEGRAM_TOKEN"):
-        print("Aviso: TELEGRAM_TOKEN não configurado!")
-    if not os.getenv("TELEGRAM_CHAT_ID"):
-        print("Aviso: TELEGRAM_CHAT_ID não configurado!")
-    if not os.getenv("GEMINI_API_KEY"):
-        print("Erro: GEMINI_API_KEY não encontrada!")
-        return
+    if missing:
+        print(f"Aviso: Variáveis faltando: {', '.join(missing)}")
+        if "GEMINI_API_KEY" in missing:
+            return False
+            
+    # Inicia o scheduler
+    start_scheduler()
+    return True
 
-    # Inicia o scheduler em uma thread separada
-    print("\n[*] Iniciando agendador de tarefas em segundo plano...")
-    scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
-    scheduler_thread.start()
-
-# Inicializa o bot assim que o módulo for carregado
-init_bot()
-
-def main():
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+# Inicialização
+if init_bot():
+    print("[*] Bot pronto.")
 
 if __name__ == "__main__":
-    main()
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
 
