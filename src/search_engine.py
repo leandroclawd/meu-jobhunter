@@ -46,8 +46,11 @@ def get_job_opportunities():
     
     queries = [
         'site:gupy.io/job "Recursos Humanos" "Manaus" -remoto',
-        'site:gupy.io/job "Gerente de RH" "Manaus" -remoto',
-        'site:gupy.io/job "HRBP" "Manaus" -remoto',
+        'site:br.indeed.com "Recursos Humanos" "Manaus"',
+        'site:infojobs.com.br "Recursos Humanos" "Manaus"',
+        'site:catho.com.br "Recursos Humanos" "Manaus"',
+        'site:portaldoholanda.com.br "vaga" "Manaus" "RH"',
+        'site:amazonempregos.com.br "RH" "Manaus"',
         'site:boards.greenhouse.io "Recursos Humanos" "Manaus"',
         'site:jobs.lever.co "Recursos Humanos" "Manaus"'
     ]

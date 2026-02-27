@@ -14,7 +14,7 @@ def evaluate_job(job_url, job_text):
     Você é um assistente de recrutamento executivo. O seu objetivo é analisar uma vaga de emprego na área de Recursos Humanos.
     
     PERFIL DA CANDIDATA:
-    - Nível: Analista Sênior, Supervisão Sênior, Supervisora, Gerência, Diretoria ou HRBP (Business Partner).
+    - Nível: Analista Pleno, Analista Sênior, Supervisão Sênior, Supervisora, Gerência, Diretoria ou HRBP (Business Partner).
     - Localidade: **Obrigatório/Foco Principal:** Presencial em Manaus, Amazonas (AM). Apenas considere opcionais vagas remotas se forem um encaixe absolutamente perfeito, mas priorize vagas locais em Manaus.
     - Skills principais: Formação em Gestão de RH, Sienge, Trello, gestão de equipes grandes (+300 funcionários), estruturação de processos.
     

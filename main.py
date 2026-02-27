@@ -18,9 +18,10 @@ app = Flask(__name__)
 MANAUS_TZ = pytz.timezone('America/Manaus')
 
 @app.route('/')
+@app.route('/ping')
 def health_check():
-    # Endpoint extremamente leve para o UptimeRobot e Render
-    return "OK", 200
+    # Endpoint leve para o UptimeRobot e Render
+    return "Bot is alive!", 200
 
 @app.route('/run')
 def manual_run():
@@ -75,11 +76,11 @@ def start_scheduler():
     scheduler = BackgroundScheduler(timezone=MANAUS_TZ)
     
     # Agendamentos originais (Manaus Time)
-    scheduler.add_job(run_job_search, 'cron', hour=8, minute=0, id='search_morning')
-    scheduler.add_job(run_job_search, 'cron', hour=18, minute=0, id='search_evening')
+    scheduler.add_job(run_job_search, 'cron', hour=8, minute=0, id='search_morning', misfire_grace_time=3600, coalesce=True)
+    scheduler.add_job(run_job_search, 'cron', hour=18, minute=0, id='search_evening', misfire_grace_time=3600, coalesce=True)
     
-    # TESTE PARA O USUÁRIO: 20:00 de hoje (Manaus)
-    scheduler.add_job(run_job_search, 'cron', hour=20, minute=0, id='search_test_20h')
+    # TESTE PARA O USUÁRIO: 21:00 de hoje (Manaus) - Atualizado para novo teste
+    scheduler.add_job(run_job_search, 'cron', hour=21, minute=0, id='search_test_21h', misfire_grace_time=3600, coalesce=True)
     
     scheduler.start()
     
