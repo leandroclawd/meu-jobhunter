@@ -9,6 +9,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from src.search_engine import get_job_opportunities
 from src.ai_agent import evaluate_job
 from src.telegram_bot import send_jobs_report, send_telegram_message
+from src.html_generator import build_dashboard
 
 load_dotenv()
 
@@ -45,6 +46,9 @@ def run_job_search():
         
         print("\n1. Buscando novas oportunidades...")
         jobs = get_job_opportunities()
+        
+        # Atualiza o painel interativo na web com as vagas raw do dia
+        build_dashboard(jobs)
         
         if not jobs:
             print("Nenhuma vaga encontrada ou erro na busca.")
