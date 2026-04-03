@@ -1,7 +1,7 @@
 import os
 import time
 import threading
-from flask import Flask
+from flask import Flask, send_file
 from dotenv import load_dotenv
 import pytz
 from datetime import datetime
@@ -22,6 +22,13 @@ MANAUS_TZ = pytz.timezone('America/Manaus')
 def health_check():
     # Endpoint leve para o UptimeRobot e Render
     return "Bot is alive!", 200
+
+@app.route('/vagas')
+def painel_vagas():
+    # Verifica se o arquivo existe antes de enviar
+    if os.path.exists('painel_vagas.html'):
+        return send_file('painel_vagas.html')
+    return "O painel de vagas ainda não foi gerado. Execute uma busca primeiro.", 404
 
 @app.route('/run')
 def manual_run():
