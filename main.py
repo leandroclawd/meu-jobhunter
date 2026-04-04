@@ -1,7 +1,7 @@
 import os
 import time
 import threading
-from flask import Flask, send_file
+from flask import Flask, send_file, make_response
 from dotenv import load_dotenv
 import pytz
 from datetime import datetime
@@ -28,7 +28,11 @@ def health_check():
 def painel_vagas():
     # Verifica se o arquivo existe antes de enviar
     if os.path.exists('painel_vagas.html'):
-        return send_file('painel_vagas.html')
+        response = make_response(send_file('painel_vagas.html'))
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
     return "O painel de vagas ainda não foi gerado. Execute uma busca primeiro.", 404
 
 @app.route('/run')
