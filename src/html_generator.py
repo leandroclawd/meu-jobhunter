@@ -202,6 +202,47 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
         .badge-new {{ background: var(--color-new); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em; }}
         .badge-tracked {{ background: var(--color-tracked); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em; }}
 
+        .btn-update {{
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }}
+        .btn-update:hover {{
+            background: var(--gradient);
+            border-color: transparent;
+        }}
+        .btn-update:active {{ transform: scale(0.95); }}
+        
+        #toast-notification {{
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--gradient);
+            color: #fff;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 999;
+            font-weight: 600;
+        }}
+        #toast-notification.show {{
+            transform: translateY(0);
+            opacity: 1;
+        }}
+
         @keyframes fadeInUp {{ from {{ opacity: 0; transform: translateY(30px); }} to {{ opacity: 1; transform: translateY(0); }} }}
         @keyframes fadeInDown {{ from {{ opacity: 0; transform: translateY(-30px); }} to {{ opacity: 1; transform: translateY(0); }} }}
         
@@ -219,6 +260,7 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
     <header>
         <h1>Job Hunter Board</h1>
         <p class="subtitle">Resultado da última busca em Manaus/AM</p>
+        <button class="btn-update" onclick="forceUpdate()">🔄 Buscar Novas Vagas Agora!</button>
     </header>
     
     <div class="stats" id="dashboard-stats">
@@ -281,7 +323,24 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
     html += """
     </div>
 
+    <div id="toast-notification">A caçada começou! Atualize a página em 1 minutinho. 🚀</div>
+
     <script>
+    function forceUpdate() {
+        let btn = document.querySelector('.btn-update');
+        btn.innerText = '⏳ Robô trabalhando...';
+        btn.style.opacity = '0.7';
+        btn.disabled = true;
+        
+        fetch('/run')
+            .then(res => {
+                let toast = document.getElementById('toast-notification');
+                toast.classList.add('show');
+                setTimeout(() => { toast.classList.remove('show'); }, 6000);
+            })
+            .catch(err => console.error(err));
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
         let discarded = JSON.parse(localStorage.getItem('job_discarded') || '[]');
         let tracked = JSON.parse(localStorage.getItem('job_tracked') || '[]');
