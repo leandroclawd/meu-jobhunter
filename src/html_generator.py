@@ -21,6 +21,9 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
             --text-secondary: #94a3b8;
             --accent: #3b82f6;
             --gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --color-new: #10b981;
+            --color-tracked: #f59e0b;
+            --color-discard: #ef4444;
         }}
 
         * {{
@@ -89,7 +92,6 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             overflow: hidden;
-            text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -114,17 +116,27 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
             background: rgba(30, 41, 59, 0.8);
         }}
 
-        .card:hover::before {{
-            opacity: 1;
-        }}
+        .card:hover::before {{ opacity: 1; }}
+
+        /* Status esteticos baseados nas tags */
+        .card.new-job {{ border-left: 4px solid var(--color-new); }}
+        .card.new-job::before {{ background: var(--color-new); border-color: var(--color-new); opacity: 1; }}
+        
+        .card.tracked {{ border-color: var(--color-tracked); box-shadow: 0 0 15px rgba(245, 158, 11, 0.15); }}
+        .card.tracked::before {{ background: var(--color-tracked); opacity: 1; }}
 
         .card-content {{
             flex-grow: 1;
             padding-right: 1.5rem;
         }}
 
-        .job-title {{
+        .job-title-link {{
+            text-decoration: none;
             color: var(--text-main);
+            display: inline-block;
+        }}
+
+        .job-title {{
             font-weight: 600;
             font-size: 1.15rem;
             margin-bottom: 0.25rem;
@@ -132,9 +144,7 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
             transition: color 0.3s ease;
         }}
         
-        .card:hover .job-title {{
-            color: #fff;
-        }}
+        .card:hover .job-title {{ color: #fff; }}
 
         .job-domain {{
             color: var(--text-secondary);
@@ -143,6 +153,7 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }}
 
         .job-domain::before {{
@@ -155,52 +166,77 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
             opacity: 0.7;
         }}
 
-        .btn-visit {{
+        /* Botoes e Acoes */
+        .actions {{
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: nowrap;
+        }}
+
+        .btn-action {{
             background: rgba(255,255,255,0.03);
             border: 1px solid var(--border-color);
-            padding: 0.6rem 1.2rem;
+            padding: 0.6rem 1rem;
             border-radius: 10px;
             color: var(--text-main);
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
             white-space: nowrap;
+            cursor: pointer;
+            text-decoration: none;
         }}
-
+        
+        .btn-visit {{ color: #fff; }}
         .card:hover .btn-visit {{
             background: var(--gradient);
             border-color: transparent;
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-            transform: scale(1.05);
         }}
 
-        @keyframes fadeInUp {{
-            from {{ opacity: 0; transform: translateY(30px); }}
-            to {{ opacity: 1; transform: translateY(0); }}
-        }}
+        .btn-discard:hover {{ background: var(--color-discard); border-color: transparent; }}
+        .btn-track:hover {{ background: var(--color-tracked); border-color: transparent; }}
+        .btn-tracked-active {{ background: var(--color-tracked); border-color: transparent; }}
 
-        @keyframes fadeInDown {{
-            from {{ opacity: 0; transform: translateY(-30px); }}
-            to {{ opacity: 1; transform: translateY(0); }}
-        }}
+        /* Badges */
+        .badge-new {{ background: var(--color-new); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em; }}
+        .badge-tracked {{ background: var(--color-tracked); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em; }}
+
+        @keyframes fadeInUp {{ from {{ opacity: 0; transform: translateY(30px); }} to {{ opacity: 1; transform: translateY(0); }} }}
+        @keyframes fadeInDown {{ from {{ opacity: 0; transform: translateY(-30px); }} to {{ opacity: 1; transform: translateY(0); }} }}
         
-        .empty-state {{
-            text-align: center;
-            color: var(--text-secondary);
-            padding: 4rem 2rem;
-            background: var(--card-bg);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-        }}
+        .empty-state {{ text-align: center; color: var(--text-secondary); padding: 4rem 2rem; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); }}
+        
+        /* Stats dashboard */
+        .stats {{ display: flex; gap: 2rem; justify-content: center; margin-bottom: 2rem; animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.1s; }}
+        .stat-box {{ background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem 2rem; text-align: center; }}
+        .stat-value {{ font-size: 2rem; font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
+        .stat-label {{ font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.2rem; }}
+
     </style>
 </head>
 <body>
     <header>
         <h1>Job Hunter Board</h1>
-        <p class="subtitle">Resultado da última busca: <b>{total_jobs} oportunidades em RH</b></p>
+        <p class="subtitle">Resultado da última busca em Manaus/AM</p>
     </header>
     
-    <div class="container">
+    <div class="stats" id="dashboard-stats">
+        <div class="stat-box">
+            <div class="stat-value" id="stat-total">{total_jobs}</div>
+            <div class="stat-label">Vagas Listadas</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="stat-novas" style="background: var(--color-new); -webkit-background-clip: text;">0</div>
+            <div class="stat-label">Vagas Novas Hoje</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="stat-acompanhando" style="background: var(--color-tracked); -webkit-background-clip: text;">0</div>
+            <div class="stat-label">Acompanhando</div>
+        </div>
+    </div>
+    
+    <div class="container" id="cards-container">
 """
     
     try:
@@ -209,11 +245,11 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
         if not unique_urls:
             html += """
         <div class="empty-state">
-            <p>Nenhuma vaga foi encontrada na última varredura. Tente novamente no próximo ciclo.</p>
+            <p>Nenhuma vaga foi encontrada na última varredura.</p>
         </div>
 """
         else:
-            for url in unique_urls:
+            for i, url in enumerate(unique_urls):
                 try:
                     domain = urlparse(url).netloc
                     domain = domain.replace('www.', '')
@@ -225,19 +261,135 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
                     display_url = display_url[:72] + '...'
                     
                 html += f"""
-        <a href="{url}" target="_blank" class="card">
+        <div class="card" data-url="{url}" id="card-{i}">
             <div class="card-content">
-                <div class="job-title">{display_url}</div>
-                <div class="job-domain">{domain}</div>
+                <a href="{url}" target="_blank" class="job-title-link">
+                    <div class="job-title">{display_url}</div>
+                </a>
+                <div class="job-domain">{domain} <span class="badges-container"></span></div>
             </div>
-            <div class="btn-visit">Ver Vaga</div>
-        </a>
+            <div class="actions">
+                <button class="btn-action btn-track" onclick="toggleTrack('{url}', 'card-{i}')">⭐ Seguir</button>
+                <button class="btn-action btn-discard" onclick="discardJob('{url}', 'card-{i}')">🗑️ Ocultar</button>
+                <a href="{url}" target="_blank" class="btn-action btn-visit">Ir pra Vaga</a>
+            </div>
+        </div>
 """
     except Exception as e:
         html += f"<p style='color:red;'>Erro ao compilar o painel: {e}</p>"
 
     html += """
     </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let discarded = JSON.parse(localStorage.getItem('job_discarded') || '[]');
+        let tracked = JSON.parse(localStorage.getItem('job_tracked') || '[]');
+        let seen = JSON.parse(localStorage.getItem('job_seen') || '[]');
+        
+        let newCount = 0;
+        let trackedCount = 0;
+        let visibleCount = 0;
+        
+        document.querySelectorAll('.card').forEach(card => {
+            let url = card.getAttribute('data-url');
+            
+            // Remocao das descartadas
+            if (discarded.includes(url)) {
+                card.style.display = 'none';
+                return; // Pula o resto da analise pra esse card
+            }
+            
+            visibleCount++;
+            let badges = card.querySelector('.badges-container');
+            
+            // Vagas acompanhadas
+            if (tracked.includes(url)) {
+                card.classList.add('tracked');
+                let trackBtn = card.querySelector('.btn-track');
+                trackBtn.innerText = '★ Remover';
+                trackBtn.classList.add('btn-tracked-active');
+                badges.innerHTML += '<span class="badge-tracked badge-node">SEGUINDO</span>';
+                trackedCount++;
+            }
+            
+            // Novas Vagas (Apenas marca como nova, salva no localstore no final do loop)
+            if (!seen.includes(url)) {
+                card.classList.add('new-job');
+                badges.innerHTML += '<span class="badge-new badge-node">NOVA HOJE</span>';
+                newCount++;
+                seen.push(url);
+            }
+        });
+        
+        // Update stats
+        document.getElementById('stat-total').innerText = visibleCount;
+        document.getElementById('stat-novas').innerText = newCount;
+        document.getElementById('stat-acompanhando').innerText = trackedCount;
+        
+        // Salva que vimos essas vagas hoje (evita duplicar "NOVA" eternamente)
+        localStorage.setItem('job_seen', JSON.stringify(seen));
+    });
+    
+    function discardJob(url, cardId) {
+        let discarded = JSON.parse(localStorage.getItem('job_discarded') || '[]');
+        if (!discarded.includes(url)) {
+            discarded.push(url);
+            localStorage.setItem('job_discarded', JSON.stringify(discarded));
+        }
+        // Anima a saida
+        let card = document.getElementById(cardId);
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(50px)';
+        setTimeout(() => {
+            card.style.display = 'none';
+            updateStats();
+        }, 300);
+    }
+    
+    function toggleTrack(url, cardId) {
+        let tracked = JSON.parse(localStorage.getItem('job_tracked') || '[]');
+        let card = document.getElementById(cardId);
+        let trackBtn = card.querySelector('.btn-track');
+        let badges = card.querySelector('.badges-container');
+        
+        if (tracked.includes(url)) {
+            // Un-track
+            tracked = tracked.filter(u => u !== url);
+            localStorage.setItem('job_tracked', JSON.stringify(tracked));
+            
+            card.classList.remove('tracked');
+            trackBtn.innerText = '⭐ Seguir';
+            trackBtn.classList.remove('btn-tracked-active');
+            let b = badges.querySelector('.badge-tracked');
+            if (b) b.remove();
+        } else {
+            // Track
+            tracked.push(url);
+            localStorage.setItem('job_tracked', JSON.stringify(tracked));
+            
+            card.classList.add('tracked');
+            trackBtn.innerText = '★ Remover';
+            trackBtn.classList.add('btn-tracked-active');
+            badges.innerHTML += '<span class="badge-tracked badge-node">SEGUINDO</span>';
+        }
+        updateStats();
+    }
+    
+    function updateStats() {
+        let tracked = JSON.parse(localStorage.getItem('job_tracked') || '[]');
+        let discarded = JSON.parse(localStorage.getItem('job_discarded') || '[]');
+        let allCards = document.querySelectorAll('.card');
+        
+        let visibleCount = 0;
+        allCards.forEach(c => {
+            if (c.style.display !== 'none') visibleCount++;
+        });
+        
+        document.getElementById('stat-total').innerText = visibleCount;
+        document.getElementById('stat-acompanhando').innerText = tracked.length;
+    }
+    </script>
 </body>
 </html>
 """
