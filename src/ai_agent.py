@@ -18,6 +18,10 @@ def evaluate_job(job_url, job_text):
     - Localidade: **Obrigatório/Foco Principal:** Presencial em Manaus, Amazonas (AM). Apenas considere opcionais vagas remotas se forem um encaixe absolutamente perfeito, mas priorize vagas locais em Manaus.
     - Skills principais: Formação em Gestão de RH, Sienge, Trello, gestão de equipes grandes (+300 funcionários), estruturação de processos.
     
+    REGRAS DE ATUALIDADE (MUITO IMPORTANTE):
+    - Atenção ao ano atual (estamos em abril de 2026).
+    - Você DEVE descartar vagas que tenham datas de encerramento passadas, que sejam do ano de 2025 (ou mais velhas) ou onde o texto cite explicitamente que o processo seletivo foi "encerrado", "concluído" ou "pausado". Apenas considere vagas ativas.
+    
     URL DA VAGA: {job_url}
     
     TEXTO DA VAGA:
@@ -28,7 +32,7 @@ def evaluate_job(job_url, job_text):
     
     RETORNO ESPERADO:
     Retorne **apenas** no formato abaixo. NÃO adicione nenhum texto introdutório ou conclusivo.
-    Se a vaga for completamente irrelevante para Manaus (e não for expressamente remota) ou for de nível júnior/assistente, retorne **vazio** ou diga 'DESCARTAR'.
+    Se a vaga for inativa (antiga/2025/encerrada), completamente irrelevante para Manaus (e não for remota) ou de perfil junior/assistente, retorne **vazio** ou diga 'DESCARTAR'.
     
     **[Título da Vaga] na [Nome da Empresa]**
     🔗 Link: {job_url}
