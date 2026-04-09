@@ -12,8 +12,8 @@ def duckduckgo_search_jobs(query, num_results=5):
     try:
         with DDGS() as ddgs:
             # max_results controla quantas paginas ele traz
-            # timelimit='w' garante resultados apenas da última semana (vagas recentes/ativas)
-            results = ddgs.text(query, max_results=num_results, timelimit='w')
+            # timelimit='m' garante resultados apenas do ultimo mes (vagas recentes/ativas)
+            results = ddgs.text(query, max_results=num_results, timelimit='m')
             for res in results:
                 if 'href' in res:
                     urls.append(res['href'])
