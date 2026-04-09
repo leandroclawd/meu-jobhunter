@@ -85,7 +85,7 @@ def run_job_search():
             
             if resultado:
                 avaliacoes.append(resultado)
-            time.sleep(2)
+            time.sleep(6)
             
         # Salva o historico atualizado
         try:

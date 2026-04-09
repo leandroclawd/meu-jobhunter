@@ -1,4 +1,5 @@
 import os
+import time
 from google import genai
 from google.genai import types
 
@@ -41,18 +42,27 @@ def evaluate_job(job_url, job_text):
     ---
     """
     
-    try:
-        response = client.models.generate_content(
-            model='gemini-2.0-flash',
-            contents=prompt,
-        )
-        # Se a IA decidiu descartar essa vaga, não retornamos nada
-        if "DESCARTAR" in response.text.upper():
-            return None
-        return response.text
-    except Exception as e:
-        print(f"Erro ao consultar o Gemini para {job_url}: {e}")
-        return None
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=prompt,
+            )
+            # Se a IA decidiu descartar essa vaga, não retornamos nada
+            if "DESCARTAR" in response.text.upper():
+                return None
+            return response.text
+        except Exception as e:
+            msg_erro = str(e)
+            if "429" in msg_erro or "Quota" in msg_erro or "RESOURCE_EXHAUSTED" in msg_erro:
+                print(f"    [Aviso] Limite do Gemini atingido. Aguardando 30s... (Tentativa {attempt+1}/3)")
+                time.sleep(30)
+            else:
+                print(f"Erro ao consultar o Gemini para {job_url}: {e}")
+                return None
+                
+    print(f"Falha ao consultar o Gemini após 3 tentativas para {job_url}")
+    return None
 
 if __name__ == "__main__":
     from dotenv import load_dotenv

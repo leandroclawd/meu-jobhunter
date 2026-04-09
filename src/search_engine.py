@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 from bs4 import BeautifulSoup
 
@@ -69,6 +70,7 @@ def get_job_opportunities():
                     "url": url,
                     "text": text[:4000]
                 })
+        time.sleep(4) # Pausa estratégica para evitar bloqueios do DuckDuckGo
                 
     return jobs_data
 
