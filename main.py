@@ -1,6 +1,7 @@
 import os
 import time
 import threading
+import json
 from flask import Flask, send_file, make_response
 from dotenv import load_dotenv
 import pytz
@@ -62,12 +63,36 @@ def run_job_search():
         print(f"\n2. Avaliando {len(jobs)} vagas com o Gemini...")
         avaliacoes = []
         
+        HISTORY_FILE = "historico_vagas.json"
+        historico = []
+        if os.path.exists(HISTORY_FILE):
+            try:
+                with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+                    historico = json.load(f)
+            except Exception as e:
+                print(f"Erro ao ler historico: {e}")
+        
         for i, job in enumerate(jobs):
-            print(f"  Avaliando vaga {i+1}/{len(jobs)}: {job['url']}")
+            url = job['url']
+            if url in historico:
+                print(f"  [{i+1}/{len(jobs)}] Pulando vaga já avaliada anteriormente: {url}")
+                continue
+                
+            print(f"  [{i+1}/{len(jobs)}] Avaliando nova vaga: {url}")
             resultado = evaluate_job(job['url'], job['text'])
+            
+            historico.append(url)
+            
             if resultado:
                 avaliacoes.append(resultado)
             time.sleep(2)
+            
+        # Salva o historico atualizado
+        try:
+            with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+                json.dump(historico, f, indent=4)
+        except Exception as e:
+            print(f"Erro ao salvar historico: {e}")
             
         if avaliacoes:
             print(f"\n3. Enviando {len(avaliacoes)} resultados aprovados...")
