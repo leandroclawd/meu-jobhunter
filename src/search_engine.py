@@ -47,26 +47,25 @@ def get_job_opportunities():
     """Busca vagas usando os dorks configurados."""
     
     queries = [
-        # Dorks originais
+        # Dorks originais refinados (Adicionado subdiretórios de vagas para evitar páginas de avaliações/lixo)
         'site:gupy.io/job "Recursos Humanos" "Manaus" -remoto',
-        'site:br.indeed.com "Recursos Humanos" "Manaus"',
-        'site:infojobs.com.br "Recursos Humanos" "Manaus"',
-        'site:catho.com.br "Recursos Humanos" "Manaus"',
-        'site:portaldoholanda.com.br "vaga" "Manaus" "RH"',
+        'site:br.indeed.com/viewjob "Recursos Humanos" "Manaus"',
+        'site:infojobs.com.br/emprego "Recursos Humanos" "Manaus"',
+        'site:catho.com.br/vagas "Recursos Humanos" "Manaus"',
         'site:amazonempregos.com.br "RH" "Manaus"',
         'site:boards.greenhouse.io "Recursos Humanos" "Manaus"',
         'site:jobs.lever.co "Recursos Humanos" "Manaus"',
         
-        # Dorks Adicionadas para ampliar os resultados
+        # Dorks Adicionadas e filtradas
         'site:gupy.io/job "RH" "Manaus"',
-        'site:vagas.com.br "Recursos Humanos" "Manaus"',
-        'site:vagas.com.br "RH" "Manaus"',
-        'site:br.indeed.com "RH" "Manaus"',
-        'site:catho.com.br "RH" "Manaus"',
-        'site:solides.jobs "Recursos Humanos" "Manaus"',
-        'site:solides.jobs "RH" "Manaus"',
-        'site:trabalhabrasil.com.br "Recursos Humanos" "Manaus"',
-        'site:trabalhabrasil.com.br "RH" "Manaus"',
+        'site:vagas.com.br/vagas "Recursos Humanos" "Manaus"',
+        'site:vagas.com.br/vagas "RH" "Manaus"',
+        'site:br.indeed.com/viewjob "RH" "Manaus"',
+        'site:catho.com.br/vagas "RH" "Manaus"',
+        'site:solides.jobs/vaga "Recursos Humanos" "Manaus"',
+        'site:solides.jobs/vaga "RH" "Manaus"',
+        'site:trabalhabrasil.com.br/vagas-empregos "Recursos Humanos" "Manaus"',
+        'site:trabalhabrasil.com.br/vagas-empregos "RH" "Manaus"',
     ]
     
     jobs_data = []
