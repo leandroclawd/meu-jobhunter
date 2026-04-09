@@ -47,6 +47,7 @@ def get_job_opportunities():
     """Busca vagas usando os dorks configurados."""
     
     queries = [
+        # Dorks originais
         'site:gupy.io/job "Recursos Humanos" "Manaus" -remoto',
         'site:br.indeed.com "Recursos Humanos" "Manaus"',
         'site:infojobs.com.br "Recursos Humanos" "Manaus"',
@@ -54,7 +55,18 @@ def get_job_opportunities():
         'site:portaldoholanda.com.br "vaga" "Manaus" "RH"',
         'site:amazonempregos.com.br "RH" "Manaus"',
         'site:boards.greenhouse.io "Recursos Humanos" "Manaus"',
-        'site:jobs.lever.co "Recursos Humanos" "Manaus"'
+        'site:jobs.lever.co "Recursos Humanos" "Manaus"',
+        
+        # Dorks Adicionadas para ampliar os resultados
+        'site:gupy.io/job "RH" "Manaus"',
+        'site:vagas.com.br "Recursos Humanos" "Manaus"',
+        'site:vagas.com.br "RH" "Manaus"',
+        'site:br.indeed.com "RH" "Manaus"',
+        'site:catho.com.br "RH" "Manaus"',
+        'site:solides.jobs "Recursos Humanos" "Manaus"',
+        'site:solides.jobs "RH" "Manaus"',
+        'site:trabalhabrasil.com.br "Recursos Humanos" "Manaus"',
+        'site:trabalhabrasil.com.br "RH" "Manaus"',
     ]
     
     jobs_data = []
