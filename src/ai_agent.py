@@ -12,16 +12,19 @@ def evaluate_job(job_url, job_text):
     client = genai.Client(api_key=api_key)
     
     prompt = f"""
-    Você é um assistente de recrutamento executivo. O seu objetivo é analisar uma vaga de emprego na área de Recursos Humanos.
+    Você é um assistente de recrutamento executivo implacável. O seu objetivo é analisar uma vaga de emprego na área de Recursos Humanos e descartar severamente tudo que saia da regra do usuário.
     
     PERFIL DA CANDIDATA:
     - Nível: Analista Pleno, Analista Sênior, Supervisão Sênior, Supervisora, Gerência, Diretoria ou HRBP (Business Partner).
-    - Localidade: **Obrigatório/Foco Principal:** Presencial em Manaus, Amazonas (AM). Apenas considere opcionais vagas remotas se forem um encaixe absolutamente perfeito, mas priorize vagas locais em Manaus.
+    - Localidade: **EXTREMAMENTE OBRIGATÓRIO:** Vaga PRESENCIAL (ou modelo Híbrido se a base for) na cidade de **Manaus, Amazonas (AM)**.
     - Skills principais: Formação em Gestão de RH, Sienge, Trello, gestão de equipes grandes (+300 funcionários), estruturação de processos.
     
-    REGRAS DE ATUALIDADE (MUITO IMPORTANTE):
-    - Atenção ao ano atual (estamos em abril de 2026).
-    - Você DEVE descartar vagas que tenham datas de encerramento passadas, que sejam do ano de 2025 (ou mais velhas) ou onde o texto cite explicitamente que o processo seletivo foi "encerrado", "concluído" ou "pausado". Apenas considere vagas ativas.
+    REGRAS DE DESCARTE (MUITO IMPORTANTE):
+    Você DEVE retornar a palavra DESCARTAR se qualquer uma dessas coisas acontecer:
+    1. A vaga for de qualquer outra cidade/estado que NÃO seja Manaus-AM.
+    2. A vaga for no modelo "100% Remoto" ou "Home Office". O usuário DEIXOU CLARO que quer vagas presenciais em Manaus.
+    3. A vaga for de nível muito iniciante (Júnior, Assistente ou Estágio).
+    4. A vaga citar explicitlyamente que o processo foi encerrado, é do ano de 2025 ou mais velha.
     
     URL DA VAGA: {job_url}
     
@@ -29,16 +32,16 @@ def evaluate_job(job_url, job_text):
     {job_text}
     
     TAREFA:
-    Analise o texto fornecido da vaga. Verifique se é aderente ao perfil da candidata, focando no nível (Sênior/Gerência/Diretoria/HRBP) e localização (Manaus). É possível usar a URL também para checar a plataforma se necessário.
+    Analise o texto fornecido da vaga. Se ela desrespeitar qualquer uma das REGRAS DE DESCARTE acima, retorne "DESCARTAR". Se for uma vaga ativa, Sênior/Gerência de RH e **fisicamente baseada em Manaus/AM**, passe-a adiante.
     
     RETORNO ESPERADO:
     Retorne **apenas** no formato abaixo. NÃO adicione nenhum texto introdutório ou conclusivo.
-    Se a vaga for inativa (antiga/2025/encerrada), completamente irrelevante para Manaus (e não for remota) ou de perfil junior/assistente, retorne **vazio** ou diga 'DESCARTAR'.
+    Se falhar na regra, retorne **apenas** a palavra 'DESCARTAR'.
     
     **[Título da Vaga] na [Nome da Empresa]**
     🔗 Link: {job_url}
     ⭐ Score: [Nota de 0 a 10 baseada na aderência ao perfil]
-    📝 Justificativa: [Breve explicação de por que essa vaga se encaixa ou não no perfil]
+    📝 Justificativa: [Breve explicação de por que essa vaga se encaixa]
     ---
     """
     
