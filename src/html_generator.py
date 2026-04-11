@@ -326,6 +326,23 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
     <div id="toast-notification">A caçada começou! Atualize a página em 1 minutinho. 🚀</div>
 
     <script>
+    function checkStatusLoop() {
+        let interval = setInterval(() => {
+            fetch('/status')
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.is_searching) {
+                        clearInterval(interval);
+                        let toast = document.getElementById('toast-notification');
+                        toast.innerText = "Busca finalizada! Atualizando tela...";
+                        toast.classList.add('show');
+                        setTimeout(() => { window.location.reload(); }, 1500);
+                    }
+                })
+                .catch(err => console.error(err));
+        }, 3000);
+    }
+
     function forceUpdate() {
         let btn = document.querySelector('.btn-update');
         btn.innerText = '⏳ Robô trabalhando...';
@@ -333,12 +350,24 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
         btn.disabled = true;
         
         fetch('/run')
-            .then(res => {
+            .then(async res => {
+                if (!res.ok) {
+                    let text = await res.text();
+                    throw new Error(text);
+                }
                 let toast = document.getElementById('toast-notification');
                 toast.classList.add('show');
-                setTimeout(() => { toast.classList.remove('show'); }, 6000);
+                setTimeout(() => { toast.classList.remove('show'); }, 4000);
+                
+                checkStatusLoop();
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                console.error(err);
+                alert("Não foi possível iniciar a busca: " + err.message);
+                btn.innerText = '🔄 Buscar Novas Vagas Agora!';
+                btn.style.opacity = '1';
+                btn.disabled = false;
+            });
     }
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -388,6 +417,20 @@ def build_dashboard(jobs, output_path="painel_vagas.html"):
         
         // Salva que vimos essas vagas hoje (evita duplicar "NOVA" eternamente)
         localStorage.setItem('job_seen', JSON.stringify(seen));
+
+        // Verifica se há uma busca rodando no servidor ao carregar a página
+        fetch('/status')
+            .then(res => res.json())
+            .then(data => {
+                if (data.is_searching) {
+                    let btn = document.querySelector('.btn-update');
+                    btn.innerText = '⏳ Robô trabalhando (em background)...';
+                    btn.style.opacity = '0.7';
+                    btn.disabled = true;
+                    checkStatusLoop();
+                }
+            })
+            .catch(err => console.error("Erro ao checar status:", err));
     });
     
     function discardJob(url, cardId) {

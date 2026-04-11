@@ -1,15 +1,12 @@
 import os
 import time
 import threading
-import json
-from flask import Flask, send_file, make_response
+from flask import Flask, send_file, make_response, jsonify
 from dotenv import load_dotenv
 import pytz
 from datetime import datetime
-from apscheduler.schedulers.background import BackgroundScheduler
+
 from src.search_engine import get_job_opportunities
-from src.ai_agent import evaluate_job
-from src.telegram_bot import send_jobs_report, send_telegram_message
 from src.html_generator import build_dashboard
 
 load_dotenv()
@@ -19,140 +16,62 @@ app = Flask(__name__)
 # Configuração do Fuso Horário de Manaus (UTC-4)
 MANAUS_TZ = pytz.timezone('America/Manaus')
 
+# Flag global para indicar se a busca está rodando
+IS_SEARCHING = False
+
 @app.route('/')
 @app.route('/ping')
 def health_check():
-    # Endpoint leve para o UptimeRobot e Render
     return "Bot is alive!", 200
 
 @app.route('/vagas')
 def painel_vagas():
     # Verifica se o arquivo existe antes de enviar
-    if os.path.exists('painel_vagas.html'):
-        response = make_response(send_file('painel_vagas.html'))
-        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-        response.headers["Pragma"] = "no-cache"
-        response.headers["Expires"] = "0"
-        return response
-    return "O painel de vagas ainda não foi gerado. Execute uma busca primeiro.", 404
+    if not os.path.exists('painel_vagas.html'):
+        # Gera versão inicial vazia
+        build_dashboard([])
+        
+    response = make_response(send_file('painel_vagas.html'))
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+@app.route('/status')
+def check_status():
+    global IS_SEARCHING
+    return jsonify({"is_searching": IS_SEARCHING})
 
 @app.route('/run')
 def manual_run():
+    global IS_SEARCHING
+    if IS_SEARCHING:
+        return "Já existe uma busca em andamento.", 400
+        
     now_str = datetime.now(MANAUS_TZ).strftime('%H:%M:%S')
     print(f"\n[*] Disparo manual via URL às {now_str}")
-    search_thread = threading.Thread(target=run_job_search)
+    search_thread = threading.Thread(target=run_job_search_task)
     search_thread.start()
     return "Busca de vagas iniciada com sucesso!", 200
 
-def run_job_search():
+def run_job_search_task():
+    global IS_SEARCHING
+    IS_SEARCHING = True
     try:
         now = datetime.now(MANAUS_TZ)
-        print(f"\n--- Iniciando Job Hunter Bot às {now.strftime('%d/%m/%Y %H:%M')} (Manaus) ---")
+        print(f"\n--- Iniciando Busca Web às {now.strftime('%d/%m/%Y %H:%M')} (Manaus) ---")
         
         print("\n1. Buscando novas oportunidades...")
         jobs = get_job_opportunities()
         
-        # Atualiza o painel interativo na web com as vagas raw do dia
+        print(f"\n2. Atualizando o painel interativo na web com {len(jobs)} vagas...")
         build_dashboard(jobs)
-        
-        if not jobs:
-            print("Nenhuma vaga encontrada ou erro na busca.")
-            send_jobs_report([])
-            return
-            
-        print(f"\n2. Avaliando {len(jobs)} vagas com o Gemini...")
-        avaliacoes = []
-        
-        HISTORY_FILE = "historico_vagas.json"
-        historico = []
-        if os.path.exists(HISTORY_FILE):
-            try:
-                with open(HISTORY_FILE, "r", encoding="utf-8") as f:
-                    historico = json.load(f)
-            except Exception as e:
-                print(f"Erro ao ler historico: {e}")
-        
-        for i, job in enumerate(jobs):
-            url = job['url']
-            if url in historico:
-                print(f"  [{i+1}/{len(jobs)}] Pulando vaga já avaliada anteriormente: {url}")
-                continue
-                
-            print(f"  [{i+1}/{len(jobs)}] Avaliando nova vaga: {url}")
-            resultado = evaluate_job(job['url'], job['text'])
-            
-            historico.append(url)
-            
-            if resultado:
-                avaliacoes.append(resultado)
-            time.sleep(6)
-            
-        # Salva o historico atualizado
-        try:
-            with open(HISTORY_FILE, "w", encoding="utf-8") as f:
-                json.dump(historico, f, indent=4)
-        except Exception as e:
-            print(f"Erro ao salvar historico: {e}")
-            
-        if avaliacoes:
-            print(f"\n3. Enviando {len(avaliacoes)} resultados aprovados...")
-            try:
-                with open("vagas_encontradas.md", "a", encoding="utf-8") as f:
-                    f.write(f"\n\n## Buscas de {now.strftime('%d/%m/%Y %H:%M')}\n\n")
-                    for av in avaliacoes:
-                        f.write(av + "\n\n")
-            except Exception as e:
-                print(f"Erro ao salvar arquivo MD: {e}")
-            send_jobs_report(avaliacoes)
-        else:
-            print("\nNenhuma das vagas foi aprovada.")
-            send_jobs_report([])
+        print("\n[*] Painel atualizado.")
             
     except Exception as e:
         print(f"Erro crítico no run_job_search: {e}")
-
-def start_scheduler():
-    # Inicializa o scheduler com o fuso horário correto
-    scheduler = BackgroundScheduler(timezone=MANAUS_TZ)
-    
-    # Agendamentos originais (Manaus Time)
-    scheduler.add_job(run_job_search, 'cron', hour=8, minute=0, id='search_morning', misfire_grace_time=3600, coalesce=True)
-    scheduler.add_job(run_job_search, 'cron', hour=18, minute=0, id='search_evening', misfire_grace_time=3600, coalesce=True)
-    
-    # TESTE PARA O USUÁRIO: 21:00 de hoje (Manaus) - Atualizado para novo teste
-    scheduler.add_job(run_job_search, 'cron', hour=21, minute=0, id='search_test_21h', misfire_grace_time=3600, coalesce=True)
-    
-    scheduler.start()
-    
-    # Log dos próximos passos
-    print("\n[*] Scheduler iniciado (Fuso: America/Manaus)")
-    for job in scheduler.get_jobs():
-        print(f"    - Tarefa '{job.id}': Próxima execução em {job.next_run_time}")
-
-    # Notificação tardia (após o boot do servidor principal)
-    def notify_start():
-        time.sleep(10) # Aguarda o servidor estabilizar
-        send_telegram_message("🤖 **Job Hunter Bot** inicializado!\nFuso: Manaus (UTC-4)\nBuscas: 08:00, 18:00 e Teste 20:00.")
-    
-    threading.Thread(target=notify_start, daemon=True).start()
-
-def init_bot():
-    print("Validando variáveis de ambiente...")
-    required = ["TELEGRAM_TOKEN", "TELEGRAM_CHAT_ID", "GEMINI_API_KEY"]
-    missing = [env for env in required if not os.getenv(env)]
-    
-    if missing:
-        print(f"Aviso: Variáveis faltando: {', '.join(missing)}")
-        if "GEMINI_API_KEY" in missing:
-            return False
-            
-    # Inicia o scheduler
-    start_scheduler()
-    return True
-
-# Inicialização
-if init_bot():
-    print("[*] Bot pronto.")
+    finally:
+        IS_SEARCHING = False
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
