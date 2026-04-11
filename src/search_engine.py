@@ -69,14 +69,14 @@ def get_job_opportunities():
     ]
     
     # Exclusões para evitar vagas da BYD em outros estados e sites de dicionários/tradução
-    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -site:ingles.com -site:inglês.com -site:cambridge.org -dictionary -dicionario'
+    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario'
     
     queries = [f"{q} {exclusions}" for q in base_queries]
     
     jobs_data = []
     
     # Lista de domínios proibidos (filtro extra no Python)
-    banned_domains = ['ingles.com', 'dicionario', 'dictionary', 'translation', 'cambridge.org', 'significado', 'tradutor']
+    banned_domains = ['ingles.com', 'dicionario', 'dictionary', 'translation', 'cambridge.org', 'significado', 'tradutor', 'spanishdict.com', 'glosbe.com']
 
     for dork in queries:
         print(f"[*] Buscando com a dork: {dork}")
