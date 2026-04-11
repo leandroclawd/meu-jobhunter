@@ -46,8 +46,8 @@ def extract_job_text(url):
 def get_job_opportunities():
     """Busca vagas usando os dorks configurados."""
     
-    queries = [
-        # Dorks originais refinados (Adicionado subdiretórios de vagas para evitar páginas de avaliações/lixo)
+    base_queries = [
+        # Dorks originais refinados
         'site:gupy.io/job "Recursos Humanos" "Manaus" -remoto',
         'site:br.indeed.com/viewjob "Recursos Humanos" "Manaus"',
         'site:infojobs.com.br/emprego "Recursos Humanos" "Manaus"',
@@ -68,12 +68,25 @@ def get_job_opportunities():
         'site:trabalhabrasil.com.br/vagas-empregos "RH" "Manaus"',
     ]
     
+    # Exclusões para evitar vagas da BYD em outros estados e sites de dicionários/tradução
+    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -site:ingles.com -site:inglês.com'
+    
+    queries = [f"{q} {exclusions}" for q in base_queries]
+    
     jobs_data = []
+    
+    # Lista de domínios proibidos (filtro extra no Python)
+    banned_domains = ['ingles.com', 'dicionario', 'translation']
+
     for dork in queries:
         print(f"[*] Buscando com a dork: {dork}")
         urls = duckduckgo_search_jobs(dork, num_results=10)
         
         for url in urls:
+            # Pula se for um site banido
+            if any(b in url.lower() for b in banned_domains):
+                continue
+                
             print(f"[*] Extraindo dados de: {url}")
             text = extract_job_text(url)
             if text:
