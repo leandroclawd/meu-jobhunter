@@ -83,7 +83,8 @@ def get_job_opportunities():
     banned_domains = [
         'ingles.com', 'dicionario', 'dictionary', 'translation', 'cambridge.org', 
         'significado', 'tradutor', 'spanishdict.com', 'glosbe.com',
-        'chevyavalanchefanclub.com', 'forum', 'clubedo', 'mecanica', 'autopecas'
+        'chevyavalanchefanclub.com', 'forum', 'clubedo', 'mecanica', 'autopecas',
+        'wikipedia.org', 'pt.wikipedia.org', 'en.wikipedia.org'
     ]
 
     for dork in queries:
@@ -128,7 +129,7 @@ def get_business_leads():
     
     leads = []
     seen_urls = set()
-    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com']
+    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org']
     
     for q in queries:
         print(f"[*] Buscando leads de negócios: {q}")
