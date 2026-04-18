@@ -87,7 +87,8 @@ def get_job_opportunities():
         'chevyavalanchefanclub.com', 'forum', 'clubedo', 'mecanica', 'autopecas',
         'wikipedia.org', 'pt.wikipedia.org', 'en.wikipedia.org', '.pdf', 'millaray-temuco.cl',
         'tiktok.com', 'facebook.com', 'instagram.com', 'twitter.com', 'x.com',
-        'mobills.com.br', 'meupaitrabalha', 'vagas.com.br/blog' # Bloqueando blogs de dicas que não são a vaga em si
+        'mobills.com.br', 'meupaitrabalha', 'vagas.com.br/blog', 'gupy.io/blog', 'gupy.io/blog-do-emprego',
+        'blog.gupy.io', 'vagas.com.br/educacao'
     ]
 
     for dork in queries:
@@ -132,7 +133,7 @@ def get_business_leads():
     
     leads = []
     seen_urls = set()
-    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br']
+    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br', 'gupy.io/blog', 'vagas.com.br/blog']
     
     for q in queries:
         print(f"[*] Buscando leads de negócios: {q}")
