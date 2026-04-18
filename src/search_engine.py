@@ -121,6 +121,11 @@ def get_job_opportunities():
                     if not any(term in lower_text for term in ['vaga', 'contrata', 'currículo', 'analista']):
                         continue
 
+                # Validação especial para sites governamentais (apenas se for vaga/concurso/seleção)
+                if 'gov.br' in url.lower():
+                    if not any(term in lower_text for term in ['vaga', 'concurso', 'processo seletivo', 'contratação', 'emprego', 'rh', 'recursos humanos']):
+                        continue
+
                 jobs_data.append({
                     "url": url,
                     "text": text[:4000]
@@ -157,6 +162,12 @@ def get_business_leads():
                 # Extraímos apenas o título/texto básico para o card
                 text = extract_job_text(url)
                 if text:
+                    lower_text = text.lower()
+                    # Filtro para sites governamentais (apenas se for relevante para emprego/negócios)
+                    if 'gov.br' in url.lower():
+                        if not any(term in lower_text for term in ['vaga', 'concurso', 'contratação', 'emprego', 'rh', 'recursos humanos', 'investimento', 'fábrica', 'empresa']):
+                            continue
+
                     # Filtro de conteúdo mínimo
                     if len(text) < 500: continue
                     
