@@ -56,6 +56,10 @@ def get_job_opportunities():
         'site:boards.greenhouse.io "Recursos Humanos" "Manaus"',
         'site:jobs.lever.co "Recursos Humanos" "Manaus"',
         
+        # LinkedIn (Adicionado conforme solicitado)
+        'site:linkedin.com/jobs/view "Recursos Humanos" "Manaus"',
+        'site:linkedin.com/jobs/search "Recursos Humanos" "Manaus"',
+        
         # Dorks Adicionadas e filtradas
         'site:gupy.io/job "RH" "Manaus"',
         'site:vagas.com.br/vagas "Recursos Humanos" "Manaus"',
@@ -98,10 +102,46 @@ def get_job_opportunities():
                 
     return jobs_data
 
+def get_business_leads():
+    """Busca notícias sobre expansões e novas empresas em Manaus."""
+    queries = [
+        '"inauguração" Manaus empresa',
+        '"nova fábrica" Manaus',
+        '"ampliação" Manaus fábrica',
+        '"investimento" Manaus indústria notícia',
+        '"contratação" Manaus RH empresa novas'
+    ]
+    
+    leads = []
+    seen_urls = set()
+    
+    for q in queries:
+        print(f"[*] Buscando leads de negócios: {q}")
+        urls = duckduckgo_search_jobs(q, num_results=5)
+        for url in urls:
+            if url not in seen_urls:
+                # Extraímos apenas o título/texto básico para o card
+                text = extract_job_text(url)
+                if text:
+                    leads.append({
+                        "url": url,
+                        "title": text[:100].strip() + "...",
+                        "snippet": text[:300].strip() + "..."
+                    })
+                    seen_urls.add(url)
+        time.sleep(2)
+        
+    return leads
+
 if __name__ == "__main__":
     # Teste requer as variaveis de ambiente setadas
     from dotenv import load_dotenv
     load_dotenv()
     
+    print("--- Testando Busca de Vagas ---")
     jobs = get_job_opportunities()
-    print(f"\nTotal de vagas: {len(jobs)}")
+    print(f"Total de vagas: {len(jobs)}")
+    
+    print("\n--- Testando Busca de Leads ---")
+    leads = get_business_leads()
+    print(f"Total de leads: {len(leads)}")

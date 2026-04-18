@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import pytz
 from datetime import datetime
 
-from src.search_engine import get_job_opportunities
+from src.search_engine import get_job_opportunities, get_business_leads
 from src.html_generator import build_dashboard
 
 load_dotenv()
@@ -29,7 +29,7 @@ def painel_vagas():
     # Verifica se o arquivo existe antes de enviar
     if not os.path.exists('painel_vagas.html'):
         # Gera versão inicial vazia
-        build_dashboard([])
+        build_dashboard([], [])
         
     response = make_response(send_file('painel_vagas.html'))
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -64,8 +64,11 @@ def run_job_search_task():
         print("\n1. Buscando novas oportunidades...")
         jobs = get_job_opportunities()
         
-        print(f"\n2. Atualizando o painel interativo na web com {len(jobs)} vagas...")
-        build_dashboard(jobs)
+        print("\n2. Buscando notícias de expansão (Leads)...")
+        leads = get_business_leads()
+        
+        print(f"\n3. Atualizando o painel interativo na web com {len(jobs)} vagas e {len(leads)} leads...")
+        build_dashboard(jobs, leads)
         print("\n[*] Painel atualizado.")
             
     except Exception as e:
