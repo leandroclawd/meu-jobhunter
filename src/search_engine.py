@@ -88,7 +88,7 @@ def get_job_opportunities():
         'tiktok.com', 'facebook.com', 'instagram.com', 'twitter.com', 'x.com',
         'mobills.com.br', 'meupaitrabalha', 'vagas.com.br/blog', 'gupy.io/blog', 'gupy.io/blog-do-emprego',
         'blog.gupy.io', 'vagas.com.br/educacao', 'melhoresdestinos.com.br', 'tripadvisor', 'trivago',
-        'bahiaeconomica.com.br', 'alagoinhas', 'feiradesantana' # Exclusões específicas da Bahia
+        'bahiaeconomica.com.br', 'alagoinhas', 'feiradesantana', 'mundoconectado.com.br', 'canaltech', 'tecmundo'
     ]
 
     for dork in queries:
@@ -149,7 +149,7 @@ def get_business_leads():
     
     leads = []
     seen_urls = set()
-    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br', 'gupy.io/blog', 'vagas.com.br/blog', 'melhoresdestinos.com.br', 'tripadvisor', 'bahiaeconomica.com.br']
+    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br', 'gupy.io/blog', 'vagas.com.br/blog', 'melhoresdestinos.com.br', 'tripadvisor', 'bahiaeconomica.com.br', 'mundoconectado.com.br']
     
     for q in queries:
         print(f"[*] Buscando leads de negócios: {q}")
