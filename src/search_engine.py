@@ -72,8 +72,8 @@ def get_job_opportunities():
         'site:trabalhabrasil.com.br/vagas-empregos "RH" "Manaus"',
     ]
     
-    # Exclusões para evitar vagas de outros estados e falsos positivos
-    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -PE -Pernambuco -Recife -CE -Fortaleza -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario -headlight -farol -carro -peças -automotivo -automotive -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online -extra -afiliado -turismo -viagem -hotel -pousada -restaurante'
+    # Exclusões para evitar vagas de outros estados, cargos irrelevantes e falsos positivos
+    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -PE -Pernambuco -Recife -CE -Fortaleza -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario -headlight -farol -carro -peças -automotivo -automotive -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online -extra -afiliado -turismo -viagem -hotel -pousada -restaurante -instrutor -professor -idiomas -wizard'
     
     queries = [f"{q} {exclusions}" for q in base_queries]
     
@@ -88,7 +88,8 @@ def get_job_opportunities():
         'tiktok.com', 'facebook.com', 'instagram.com', 'twitter.com', 'x.com',
         'mobills.com.br', 'meupaitrabalha', 'vagas.com.br/blog', 'gupy.io/blog', 'gupy.io/blog-do-emprego',
         'blog.gupy.io', 'vagas.com.br/educacao', 'melhoresdestinos.com.br', 'tripadvisor', 'trivago',
-        'bahiaeconomica.com.br', 'alagoinhas', 'feiradesantana', 'mundoconectado.com.br', 'canaltech', 'tecmundo'
+        'bahiaeconomica.com.br', 'alagoinhas', 'feiradesantana', 'mundoconectado.com.br', 'canaltech', 'tecmundo',
+        'rioempregos.com.br', 'vagasrj', 'vagasmg', 'vagaspe', 'vagasce' # Bloqueando portais estaduais específicos
     ]
 
     for dork in queries:
@@ -137,7 +138,7 @@ def get_job_opportunities():
 def get_business_leads():
     """Busca notícias sobre expansões e novas empresas em Manaus."""
     # Adicionamos as mesmas exclusões para os leads
-    exclusions = '-headlight -farol -carro -peças -automotivo -automotive -forum -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online -turismo -viagem -PE -Recife -CE -Fortaleza'
+    exclusions = '-headlight -farol -carro -peças -automotivo -automotive -forum -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online -turismo -viagem -PE -Recife -CE -Fortaleza -RJ -rioempregos'
     
     queries = [
         f'"inauguração" Manaus empresa {exclusions}',
@@ -149,7 +150,7 @@ def get_business_leads():
     
     leads = []
     seen_urls = set()
-    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br', 'gupy.io/blog', 'vagas.com.br/blog', 'melhoresdestinos.com.br', 'tripadvisor', 'bahiaeconomica.com.br', 'mundoconectado.com.br']
+    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br', 'gupy.io/blog', 'vagas.com.br/blog', 'melhoresdestinos.com.br', 'tripadvisor', 'bahiaeconomica.com.br', 'mundoconectado.com.br', 'rioempregos.com.br']
     
     for q in queries:
         print(f"[*] Buscando leads de negócios: {q}")
