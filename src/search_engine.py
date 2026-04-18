@@ -72,9 +72,8 @@ def get_job_opportunities():
         'site:trabalhabrasil.com.br/vagas-empregos "RH" "Manaus"',
     ]
     
-    # Exclusões para evitar vagas da BYD, sites de dicionários, FALSOS POSITIVOS de "RH", materiais educativos, blogs de "ganhar dinheiro" e TURISMO
-    # Adicionado -site:.cl para evitar resultados do Chile e termos de viagem
-    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario -headlight -farol -carro -peças -automotivo -automotive -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online -extra -afiliado -turismo -viagem -hotel -pousada -restaurante'
+    # Exclusões para evitar vagas de outros estados e falsos positivos
+    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -PE -Pernambuco -Recife -CE -Fortaleza -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario -headlight -farol -carro -peças -automotivo -automotive -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online -extra -afiliado -turismo -viagem -hotel -pousada -restaurante'
     
     queries = [f"{q} {exclusions}" for q in base_queries]
     
@@ -121,7 +120,7 @@ def get_job_opportunities():
 def get_business_leads():
     """Busca notícias sobre expansões e novas empresas em Manaus."""
     # Adicionamos as mesmas exclusões para os leads
-    exclusions = '-headlight -farol -carro -peças -automotivo -automotive -forum -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online -turismo -viagem'
+    exclusions = '-headlight -farol -carro -peças -automotivo -automotive -forum -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online -turismo -viagem -PE -Recife -CE -Fortaleza'
     
     queries = [
         f'"inauguração" Manaus empresa {exclusions}',
