@@ -87,7 +87,8 @@ def get_job_opportunities():
         'wikipedia.org', 'pt.wikipedia.org', 'en.wikipedia.org', '.pdf', 'millaray-temuco.cl',
         'tiktok.com', 'facebook.com', 'instagram.com', 'twitter.com', 'x.com',
         'mobills.com.br', 'meupaitrabalha', 'vagas.com.br/blog', 'gupy.io/blog', 'gupy.io/blog-do-emprego',
-        'blog.gupy.io', 'vagas.com.br/educacao', 'melhoresdestinos.com.br', 'tripadvisor', 'trivago'
+        'blog.gupy.io', 'vagas.com.br/educacao', 'melhoresdestinos.com.br', 'tripadvisor', 'trivago',
+        'bahiaeconomica.com.br', 'alagoinhas', 'feiradesantana' # Exclusões específicas da Bahia
     ]
 
     for dork in queries:
@@ -104,6 +105,17 @@ def get_job_opportunities():
             # Filtro extra no texto para garantir que "RH" é Recursos Humanos e não "Right Hand" ou "Recursos Naturais"
             if text:
                 lower_text = text.lower()
+                
+                # Validação de Cidade (Manaus deve ser a estrela, não Camaçari/Bahia)
+                forbidden_cities = ['camaçari', 'alagoinhas', 'salvador', 'recife', 'fortaleza', 'rio de janeiro', 'são paulo', 'curitiba']
+                if any(city in lower_text for city in forbidden_cities):
+                    # Se tiver Manaus E uma cidade proibida, verificamos se Manaus parece ser apenas menção secundária
+                    if 'manaus' not in lower_text:
+                        continue
+                    # Se Camaçari aparecer mais que Manaus, provavelmente é de lá
+                    if lower_text.count('camaçari') > lower_text.count('manaus'):
+                        continue
+
                 # Descartar se falar de recursos naturais ou guias escolares
                 if any(term in lower_text for term in ['naturales', 'recursos naturais', 'guia de estudo', 'clase', 'educación']):
                     if not any(term in lower_text for term in ['vaga', 'contrata', 'currículo', 'analista']):
@@ -132,7 +144,7 @@ def get_business_leads():
     
     leads = []
     seen_urls = set()
-    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br', 'gupy.io/blog', 'vagas.com.br/blog', 'melhoresdestinos.com.br', 'tripadvisor']
+    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br', 'gupy.io/blog', 'vagas.com.br/blog', 'melhoresdestinos.com.br', 'tripadvisor', 'bahiaeconomica.com.br']
     
     for q in queries:
         print(f"[*] Buscando leads de negócios: {q}")
