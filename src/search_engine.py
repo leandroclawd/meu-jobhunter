@@ -72,9 +72,9 @@ def get_job_opportunities():
         'site:trabalhabrasil.com.br/vagas-empregos "RH" "Manaus"',
     ]
     
-    # Exclusões para evitar vagas da BYD, sites de dicionários, FALSOS POSITIVOS de "RH", materiais educativos e blogs de "ganhar dinheiro"
-    # Adicionado -site:.cl para evitar resultados do Chile e termos de renda extra
-    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario -headlight -farol -carro -peças -automotivo -automotive -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online -extra -afiliado'
+    # Exclusões para evitar vagas da BYD, sites de dicionários, FALSOS POSITIVOS de "RH", materiais educativos, blogs de "ganhar dinheiro" e TURISMO
+    # Adicionado -site:.cl para evitar resultados do Chile e termos de viagem
+    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario -headlight -farol -carro -peças -automotivo -automotive -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online -extra -afiliado -turismo -viagem -hotel -pousada -restaurante'
     
     queries = [f"{q} {exclusions}" for q in base_queries]
     
@@ -88,7 +88,7 @@ def get_job_opportunities():
         'wikipedia.org', 'pt.wikipedia.org', 'en.wikipedia.org', '.pdf', 'millaray-temuco.cl',
         'tiktok.com', 'facebook.com', 'instagram.com', 'twitter.com', 'x.com',
         'mobills.com.br', 'meupaitrabalha', 'vagas.com.br/blog', 'gupy.io/blog', 'gupy.io/blog-do-emprego',
-        'blog.gupy.io', 'vagas.com.br/educacao'
+        'blog.gupy.io', 'vagas.com.br/educacao', 'melhoresdestinos.com.br', 'tripadvisor', 'trivago'
     ]
 
     for dork in queries:
@@ -121,7 +121,7 @@ def get_job_opportunities():
 def get_business_leads():
     """Busca notícias sobre expansões e novas empresas em Manaus."""
     # Adicionamos as mesmas exclusões para os leads
-    exclusions = '-headlight -farol -carro -peças -automotivo -automotive -forum -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online'
+    exclusions = '-headlight -farol -carro -peças -automotivo -automotive -forum -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online -turismo -viagem'
     
     queries = [
         f'"inauguração" Manaus empresa {exclusions}',
@@ -133,7 +133,7 @@ def get_business_leads():
     
     leads = []
     seen_urls = set()
-    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br', 'gupy.io/blog', 'vagas.com.br/blog']
+    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br', 'gupy.io/blog', 'vagas.com.br/blog', 'melhoresdestinos.com.br', 'tripadvisor']
     
     for q in queries:
         print(f"[*] Buscando leads de negócios: {q}")
