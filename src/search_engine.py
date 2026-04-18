@@ -72,15 +72,19 @@ def get_job_opportunities():
         'site:trabalhabrasil.com.br/vagas-empregos "RH" "Manaus"',
     ]
     
-    # Exclusões para evitar vagas da BYD em outros estados e sites de dicionários/tradução
-    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario'
+    # Exclusões para evitar vagas da BYD em outros estados, sites de dicionários e agora FALSOS POSITIVOS de "RH" (como farol direito / Right Hand)
+    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario -headlight -farol -carro -peças -automotivo -automotive'
     
     queries = [f"{q} {exclusions}" for q in base_queries]
     
     jobs_data = []
     
     # Lista de domínios proibidos (filtro extra no Python)
-    banned_domains = ['ingles.com', 'dicionario', 'dictionary', 'translation', 'cambridge.org', 'significado', 'tradutor', 'spanishdict.com', 'glosbe.com']
+    banned_domains = [
+        'ingles.com', 'dicionario', 'dictionary', 'translation', 'cambridge.org', 
+        'significado', 'tradutor', 'spanishdict.com', 'glosbe.com',
+        'chevyavalanchefanclub.com', 'forum', 'clubedo', 'mecanica', 'autopecas'
+    ]
 
     for dork in queries:
         print(f"[*] Buscando com a dork: {dork}")
@@ -93,7 +97,14 @@ def get_job_opportunities():
                 
             print(f"[*] Extraindo dados de: {url}")
             text = extract_job_text(url)
+            # Filtro extra no texto para garantir que "RH" é Recursos Humanos e não "Right Hand"
             if text:
+                lower_text = text.lower()
+                # Se for um texto pequeno e tiver termos automotivos, descartamos
+                if any(term in lower_text for term in ['headlight', 'farol', 'tail light', 'chassi', 'suspensão', 'mecanica']):
+                    if not any(term in lower_text for term in ['recursos humanos', 'vaga', 'contrata', 'currículo']):
+                        continue
+
                 jobs_data.append({
                     "url": url,
                     "text": text[:4000]
@@ -104,25 +115,35 @@ def get_job_opportunities():
 
 def get_business_leads():
     """Busca notícias sobre expansões e novas empresas em Manaus."""
+    # Adicionamos as mesmas exclusões para os leads
+    exclusions = '-headlight -farol -carro -peças -automotivo -automotive -forum'
+    
     queries = [
-        '"inauguração" Manaus empresa',
-        '"nova fábrica" Manaus',
-        '"ampliação" Manaus fábrica',
-        '"investimento" Manaus indústria notícia',
-        '"contratação" Manaus RH empresa novas'
+        f'"inauguração" Manaus empresa {exclusions}',
+        f'"nova fábrica" Manaus {exclusions}',
+        f'"ampliação" Manaus fábrica {exclusions}',
+        f'"investimento" Manaus indústria notícia {exclusions}',
+        f'"contratação" Manaus "Recursos Humanos" empresa novas {exclusions}' # Trocamos RH por "Recursos Humanos" aqui para ser mais preciso
     ]
     
     leads = []
     seen_urls = set()
+    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com']
     
     for q in queries:
         print(f"[*] Buscando leads de negócios: {q}")
         urls = duckduckgo_search_jobs(q, num_results=5)
         for url in urls:
             if url not in seen_urls:
+                if any(b in url.lower() for b in banned_domains):
+                    continue
+
                 # Extraímos apenas o título/texto básico para o card
                 text = extract_job_text(url)
                 if text:
+                    # Filtro de conteúdo mínimo
+                    if len(text) < 500: continue
+                    
                     leads.append({
                         "url": url,
                         "title": text[:100].strip() + "...",
