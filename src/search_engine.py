@@ -89,7 +89,7 @@ def get_job_opportunities():
         'mobills.com.br', 'meupaitrabalha', 'vagas.com.br/blog', 'gupy.io/blog', 'gupy.io/blog-do-emprego',
         'blog.gupy.io', 'vagas.com.br/educacao', 'melhoresdestinos.com.br', 'tripadvisor', 'trivago',
         'bahiaeconomica.com.br', 'alagoinhas', 'feiradesantana', 'mundoconectado.com.br', 'canaltech', 'tecmundo',
-        'rioempregos.com.br', 'vagasrj', 'vagasmg', 'vagaspe', 'vagasce' # Bloqueando portais estaduais específicos
+        'rioempregos.com.br', 'vagasrj', 'vagasmg', 'vagaspe', 'vagasce', 'rh.com' # Bloqueando Restoration Hardware (falso positivo de RH)
     ]
 
     for dork in queries:
@@ -150,7 +150,7 @@ def get_business_leads():
     
     leads = []
     seen_urls = set()
-    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br', 'gupy.io/blog', 'vagas.com.br/blog', 'melhoresdestinos.com.br', 'tripadvisor', 'bahiaeconomica.com.br', 'mundoconectado.com.br', 'rioempregos.com.br']
+    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br', 'gupy.io/blog', 'vagas.com.br/blog', 'melhoresdestinos.com.br', 'tripadvisor', 'bahiaeconomica.com.br', 'mundoconectado.com.br', 'rioempregos.com.br', 'rh.com']
     
     for q in queries:
         print(f"[*] Buscando leads de negócios: {q}")
