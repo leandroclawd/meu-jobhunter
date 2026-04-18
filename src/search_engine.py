@@ -72,9 +72,9 @@ def get_job_opportunities():
         'site:trabalhabrasil.com.br/vagas-empregos "RH" "Manaus"',
     ]
     
-    # Exclusões para evitar vagas da BYD em outros estados, sites de dicionários, FALSOS POSITIVOS de "RH" e agora materiais educativos/PDFs
-    # Adicionado -site:.cl para evitar resultados do Chile
-    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario -headlight -farol -carro -peças -automotivo -automotive -site:.cl "naturales" "recursos naturais"'
+    # Exclusões para evitar vagas da BYD, sites de dicionários, FALSOS POSITIVOS de "RH", materiais educativos e blogs de "ganhar dinheiro"
+    # Adicionado -site:.cl para evitar resultados do Chile e termos de renda extra
+    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario -headlight -farol -carro -peças -automotivo -automotive -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online -extra -afiliado'
     
     queries = [f"{q} {exclusions}" for q in base_queries]
     
@@ -86,7 +86,8 @@ def get_job_opportunities():
         'significado', 'tradutor', 'spanishdict.com', 'glosbe.com',
         'chevyavalanchefanclub.com', 'forum', 'clubedo', 'mecanica', 'autopecas',
         'wikipedia.org', 'pt.wikipedia.org', 'en.wikipedia.org', '.pdf', 'millaray-temuco.cl',
-        'tiktok.com', 'facebook.com', 'instagram.com', 'twitter.com', 'x.com'
+        'tiktok.com', 'facebook.com', 'instagram.com', 'twitter.com', 'x.com',
+        'mobills.com.br', 'meupaitrabalha', 'vagas.com.br/blog' # Bloqueando blogs de dicas que não são a vaga em si
     ]
 
     for dork in queries:
@@ -119,7 +120,7 @@ def get_job_opportunities():
 def get_business_leads():
     """Busca notícias sobre expansões e novas empresas em Manaus."""
     # Adicionamos as mesmas exclusões para os leads
-    exclusions = '-headlight -farol -carro -peças -automotivo -automotive -forum -site:.cl "naturales" "recursos naturais"'
+    exclusions = '-headlight -farol -carro -peças -automotivo -automotive -forum -site:.cl "naturales" "recursos naturais" -renda -ganhar -dinheiro -online'
     
     queries = [
         f'"inauguração" Manaus empresa {exclusions}',
@@ -131,7 +132,7 @@ def get_business_leads():
     
     leads = []
     seen_urls = set()
-    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com']
+    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl', 'tiktok.com', 'facebook.com', 'instagram.com', 'mobills.com.br']
     
     for q in queries:
         print(f"[*] Buscando leads de negócios: {q}")
