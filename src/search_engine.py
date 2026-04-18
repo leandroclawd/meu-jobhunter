@@ -72,8 +72,9 @@ def get_job_opportunities():
         'site:trabalhabrasil.com.br/vagas-empregos "RH" "Manaus"',
     ]
     
-    # Exclusões para evitar vagas da BYD em outros estados, sites de dicionários e agora FALSOS POSITIVOS de "RH" (como farol direito / Right Hand)
-    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario -headlight -farol -carro -peças -automotivo -automotive'
+    # Exclusões para evitar vagas da BYD em outros estados, sites de dicionários, FALSOS POSITIVOS de "RH" e agora materiais educativos/PDFs
+    # Adicionado -site:.cl para evitar resultados do Chile
+    exclusions = '-Camaçari -Campinas -Bahia -SP -RJ -MG -PR -SC -RS -site:ingles.com -site:inglês.com -site:cambridge.org -site:spanishdict.com -site:glosbe.com -dictionary -dicionario -headlight -farol -carro -peças -automotivo -automotive -site:.cl "naturales" "recursos naturais"'
     
     queries = [f"{q} {exclusions}" for q in base_queries]
     
@@ -84,7 +85,7 @@ def get_job_opportunities():
         'ingles.com', 'dicionario', 'dictionary', 'translation', 'cambridge.org', 
         'significado', 'tradutor', 'spanishdict.com', 'glosbe.com',
         'chevyavalanchefanclub.com', 'forum', 'clubedo', 'mecanica', 'autopecas',
-        'wikipedia.org', 'pt.wikipedia.org', 'en.wikipedia.org'
+        'wikipedia.org', 'pt.wikipedia.org', 'en.wikipedia.org', '.pdf', 'millaray-temuco.cl'
     ]
 
     for dork in queries:
@@ -92,18 +93,18 @@ def get_job_opportunities():
         urls = duckduckgo_search_jobs(dork, num_results=10)
         
         for url in urls:
-            # Pula se for um site banido
-            if any(b in url.lower() for b in banned_domains):
+            # Pula se for um site banido ou arquivo PDF
+            if any(b in url.lower() for b in banned_domains) or url.lower().endswith('.pdf'):
                 continue
                 
             print(f"[*] Extraindo dados de: {url}")
             text = extract_job_text(url)
-            # Filtro extra no texto para garantir que "RH" é Recursos Humanos e não "Right Hand"
+            # Filtro extra no texto para garantir que "RH" é Recursos Humanos e não "Right Hand" ou "Recursos Naturais"
             if text:
                 lower_text = text.lower()
-                # Se for um texto pequeno e tiver termos automotivos, descartamos
-                if any(term in lower_text for term in ['headlight', 'farol', 'tail light', 'chassi', 'suspensão', 'mecanica']):
-                    if not any(term in lower_text for term in ['recursos humanos', 'vaga', 'contrata', 'currículo']):
+                # Descartar se falar de recursos naturais ou guias escolares
+                if any(term in lower_text for term in ['naturales', 'recursos naturais', 'guia de estudo', 'clase', 'educación']):
+                    if not any(term in lower_text for term in ['vaga', 'contrata', 'currículo', 'analista']):
                         continue
 
                 jobs_data.append({
@@ -117,7 +118,7 @@ def get_job_opportunities():
 def get_business_leads():
     """Busca notícias sobre expansões e novas empresas em Manaus."""
     # Adicionamos as mesmas exclusões para os leads
-    exclusions = '-headlight -farol -carro -peças -automotivo -automotive -forum'
+    exclusions = '-headlight -farol -carro -peças -automotivo -automotive -forum -site:.cl "naturales" "recursos naturais"'
     
     queries = [
         f'"inauguração" Manaus empresa {exclusions}',
@@ -129,7 +130,7 @@ def get_business_leads():
     
     leads = []
     seen_urls = set()
-    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org']
+    banned_domains = ['forum', 'clubedo', 'mecanica', 'chevyavalanchefanclub.com', 'wikipedia.org', 'millaray-temuco.cl']
     
     for q in queries:
         print(f"[*] Buscando leads de negócios: {q}")
